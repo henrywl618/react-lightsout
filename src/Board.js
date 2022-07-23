@@ -8,7 +8,7 @@ import "./Board.css";
  *
  * - nrows: number of rows of board
  * - ncols: number of cols of board
- * - chanceLightStartsOn: float, chance any cell is lit at start of game
+ * - chanceLightStartsOn: float between 0 to 1 inclusive, chance any cell is lit at start of game
  *
  * State:
  *
@@ -27,15 +27,15 @@ import "./Board.css";
  *
  **/
 
-function Board({ nrows = 5, ncols = 5, chanceLightStartsOn }) {
+function Board({ nrows = 3, ncols = 3, chanceLightStartsOn = 0.5 }) {
   const [board, setBoard] = useState(createBoard());
 
-  /** create a board nrows high/ncols wide, each cell randomly lit or unlit */
+  /** create a board nrows high/ncols wide, each cell randomly lit (true) or unlit (false) */
   function createBoard() {
-    //Returns true or false randomly.
     const randBool = () => {
-      const random = Math.round(Math.random() * 1);
-      return random === 1 ? true : false;
+      //Returns true or false based on chanceLightStartsOn.
+      const random = Math.random();
+      return random < chanceLightStartsOn ? true : false;
     };
 
     // Creates an a nrow x ncols array of arrays of true/false values
@@ -47,11 +47,17 @@ function Board({ nrows = 5, ncols = 5, chanceLightStartsOn }) {
 
   function hasWon() {
     //Check the board in state to determine whether the player has won.
-    //isLit is a boolean value (true ifLit).
-    //If at least one cell is true (aka lit) hasWon will return false.
-    //Will return true if all cells are false(unlit).
-    console.log(board)
-    return board.some((row) => !row.some((isLit) => isLit===true));
+
+    //Use Array.some() to find at least one lit (true) cell. If at least one cell is lit anyCellsList will be true, if all cells are unlit it will be false.
+    const anyCellsLit = board.some((row) => {
+      return row.some((isLit) => {
+        return isLit === true;
+      });
+    });
+
+    //If anyCellsLit is true, the game has not been won yet so we return false.
+    //Else if anyCellsLit is false, the game has been won so we return true.
+    return anyCellsLit ? false : true;
   }
 
   function flipCellsAround(coord) {
